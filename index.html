@@ -1,0 +1,247 @@
+import tkinter as tk
+from tkinter import messagebox, StringVar, OptionMenu
+import random
+
+# Predefined lists for choices
+NAMES = ["Alex", "Jordan", "Taylor", "Casey", "Morgan", "Jamie", "Charlie", "Riley", "Avery", "Sam"]
+SCHOOLS = ["High School", "Vocational School", "Art School", "Science Academy", "Business School", "Technical Institute"]
+CAREERS = ["Junior Developer", "Teacher", "Artist", "Nurse", "Entrepreneur", "Manager", "Scientist", "Chef", "Musician", "Writer", "Pilot", "Architect"]
+ACTIVITIES = [
+    "Hobbies", "School", "Higher Education", "Work", "Career Advancement", 
+    "Start Family", "Retirement", "Travel", "Volunteer", "Learn a New Skill",
+    "Move to a New City", "Invest in Stocks", "Buy a House", "Start a Business", 
+    "Join a Club", "Take a Sabbatical", "Get a Pet"
+]
+RELATIONSHIPS = ["Dating", "Engaged", "Married", "Divorced", "Single", "Widowed"]
+HEALTH_ISSUES = ["Healthy", "Minor Illness", "Chronic Illness", "Serious Condition"]
+TRAITS = ["Creative", "Analytical", "Friendly", "Ambitious", "Organized", 
+          "Adventurous", "Detail-Oriented", "Hardworking", "Empathetic", "Resilient"]
+
+class Character:
+    def __init__(self, name, traits):
+        self.name = name
+        self.traits = traits
+        self.age = 0
+        self.education = None
+        self.career = None
+        self.relationship_status = "Single"
+        self.financial_status = 0
+        self.happiness = 50
+        self.health = "Healthy"
+        self.children = []
+        self.event_log = []
+        self.set_random_death_age()
+        self.random_events = ["Won the Lottery", "Got a Big Promotion", "Lost a Loved One", "Found a Hidden Talent"]
+
+    def set_random_death_age(self):
+        self.die_age = random.randint(50, 115)
+
+    def age_one_year(self):
+        if self.age >= self.die_age:
+            self.die()
+        else:
+            self.age += 1
+            self.happiness -= 1
+            self.financial_status -= random.randint(0, 5000)  # Small annual expenses
+            self.event_log.append(f"Year {self.age}: Another year has passed.")
+            if random.random() < 0.05:  # 5% chance of a random event each year
+                self.random_event()
+
+    def die(self):
+        self.event_log.append(f"Year {self.age}: {self.name} has died.")
+        self.died = True
+
+    def random_event(self):
+        event = random.choice(self.random_events)
+        self.event_log.append(f"Random Event: {event}")
+
+    def make_decision(self, choice):
+        if hasattr(self, 'died') and self.died:
+            return
+
+        if self.age < 13:
+            self.childhood_decisions(choice)
+        elif self.age < 20:
+            self.adolescence_decisions(choice)
+        elif self.age < 65:
+            self.adulthood_decisions(choice)
+        else:
+            self.old_age_decisions(choice)
+
+    def childhood_decisions(self, choice):
+        if choice == "Hobbies":
+            self.happiness += 10
+            self.event_log.append("Started new hobbies.")
+        elif choice == "School":
+            self.happiness += 5
+            self.event_log.append("Focused on school.")
+        elif choice == "Get a Pet":
+            self.happiness += 15
+            self.event_log.append("Adopted a pet.")
+
+    def adolescence_decisions(self, choice):
+        if choice == "Higher Education":
+            self.education = random.choice(SCHOOLS)
+            self.financial_status -= 20000
+            self.event_log.append(f"Enrolled in {self.education}.")
+        elif choice == "Work":
+            self.career = random.choice(CAREERS)
+            self.financial_status += 20000
+            self.event_log.append(f"Started working as {self.career}.")
+        elif choice == "Volunteer":
+            self.happiness += 15
+            self.event_log.append("Volunteered for a cause.")
+        elif choice == "Move to a New City":
+            self.happiness += 10
+            self.financial_status -= 5000
+            self.event_log.append("Moved to a new city for new opportunities.")
+        elif choice == "Join a Club":
+            self.happiness += 10
+            self.event_log.append("Joined a social club.")
+
+    def adulthood_decisions(self, choice):
+        if choice == "Career Advancement":
+            self.career = random.choice(CAREERS)
+            self.financial_status += 50000
+            self.event_log.append(f"Advanced career to {self.career}.")
+        elif choice == "Start Family":
+            self.relationship_status = "Married"
+            self.happiness += 20
+            self.event_log.append("Started a family.")
+        elif choice == "Invest in Stocks":
+            investment = random.choice([1000, 5000, 10000])
+            self.financial_status += investment
+            self.event_log.append(f"Invested ${investment} in stocks.")
+        elif choice == "Buy a House":
+            self.financial_status -= 100000
+            self.happiness += 25
+            self.event_log.append("Bought a new house.")
+        elif choice == "Start a Business":
+            self.financial_status -= 50000
+            self.financial_status += 100000
+            self.happiness += 30
+            self.event_log.append("Started a new business.")
+
+    def old_age_decisions(self, choice):
+        if choice == "Retirement":
+            self.financial_status += 100000
+            self.happiness += 15
+            self.event_log.append("Retired comfortably.")
+        elif choice == "Travel":
+            self.happiness += 25
+            self.event_log.append("Travelled to new places.")
+        elif choice == "Write a Book":
+            self.happiness += 20
+            self.event_log.append("Published a book.")
+        elif choice == "Revisit Old Hobbies":
+            self.happiness += 10
+            self.event_log.append("Revisited old hobbies.")
+
+    def display_status(self):
+        if hasattr(self, 'died') and self.died:
+            return f"{self.name} has passed away at age {self.age}."
+        return (f"{self.name} - Age: {self.age}\n"
+                f"Education: {self.education or 'None'}\n"
+                f"Career: {self.career or 'None'}\n"
+                f"Relationship Status: {self.relationship_status}\n"
+                f"Financial Status: ${self.financial_status}\n"
+                f"Happiness: {self.happiness}\n"
+                f"Health: {self.health}")
+
+    def display_events(self):
+        return "\n".join(self.event_log[-10:])
+
+class GameApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("LifeQuest")
+
+        self.character = None
+        self.state = 'Title'
+
+        # Title Screen
+        self.title_frame = tk.Frame(root, bg="#2e2e2e", padx=20, pady=20)
+        self.title_label = tk.Label(self.title_frame, text="Welcome to LifeQuest!", font=("Arial", 24, "bold"), fg="#ffffff", bg="#2e2e2e")
+        self.title_label.pack(pady=(0, 20))
+        self.start_button = tk.Button(self.title_frame, text="Start Game", command=self.go_to_trait_selection, font=("Arial", 14), bg="#4CAF50", fg="white", relief=tk.RAISED)
+        self.start_button.pack(pady=(10, 0))
+        self.title_frame.pack(padx=20, pady=20)
+
+        # Trait Selection Frame
+        self.trait_frame = tk.Frame(root, bg="#2e2e2e", padx=20, pady=20)
+        self.trait_vars = {trait: tk.BooleanVar() for trait in TRAITS}
+        tk.Label(self.trait_frame, text="Select Traits:", font=("Arial", 16, "bold"), fg="#ffffff", bg="#2e2e2e").pack(pady=(0, 10))
+        for trait in TRAITS:
+            tk.Checkbutton(self.trait_frame, text=trait, variable=self.trait_vars[trait], font=("Arial", 12), fg="#ffffff", bg="#2e2e2e", selectcolor="#424242").pack(anchor="w")
+        self.select_button = tk.Button(self.trait_frame, text="Start Game", command=self.start_game, font=("Arial", 14), bg="#4CAF50", fg="white", relief=tk.RAISED)
+        self.select_button.pack(pady=(10, 0))
+
+        # Game Frame
+        self.game_frame = tk.Frame(root, bg="#2e2e2e", padx=20, pady=20)
+        self.welcome_label = tk.Label(self.game_frame, text="Your Life Simulation", font=("Arial", 24, "bold"), fg="#ffffff", bg="#2e2e2e")
+        self.instructions = tk.Label(self.game_frame, text="Choose an activity and click 'Submit Decision' to advance.", font=("Arial", 14), fg="#ffffff", bg="#2e2e2e")
+        self.status_text = StringVar()
+        self.status_label = tk.Label(self.game_frame, textvariable=self.status_text, justify=tk.LEFT, anchor="w", font=("Arial", 12), fg="#ffffff", bg="#2e2e2e")
+        self.events_text = StringVar()
+        self.events_label = tk.Label(self.game_frame, textvariable=self.events_text, justify=tk.LEFT, anchor="w", font=("Arial", 10), fg="#ffffff", bg="#2e2e2e")
+
+        # Decision Making Widgets
+        self.decision_var = StringVar()
+        self.decision_menu = OptionMenu(self.game_frame, self.decision_var, *ACTIVITIES)
+        self.decision_menu.config(width=30, font=("Arial", 12), bg="#424242", fg="#ffffff", relief=tk.RAISED)
+        
+        self.next_button = tk.Button(self.game_frame, text="Submit Decision", command=self.submit_decision, font=("Arial", 14), bg="#4CAF50", fg="white", relief=tk.RAISED, state=tk.DISABLED)
+        self.new_life_button = tk.Button(self.game_frame, text="Embrace a New Beginning", command=self.start_new_life, font=("Arial", 14), bg="#FF5722", fg="white", relief=tk.RAISED)
+
+    def go_to_trait_selection(self):
+        self.state = 'TraitSelection'
+        self.title_frame.pack_forget()
+        self.trait_frame.pack(padx=20, pady=20)
+
+    def start_game(self):
+        name = random.choice(NAMES)
+        traits = [trait for trait, var in self.trait_vars.items() if var.get()]
+        if traits:
+            self.character = Character(name, traits)
+            self.state = 'Gameplay'
+            self.trait_frame.pack_forget()
+            self.setup_game_frame()
+            self.next_button.config(state=tk.NORMAL)  # Enable the next button
+            self.decision_var.set(ACTIVITIES[0])  # Default choice
+        else:
+            messagebox.showwarning("Warning", "You must select at least one trait.")
+
+    def setup_game_frame(self):
+        self.game_frame.pack(padx=20, pady=20)
+        self.welcome_label.pack(pady=(0, 20))
+        self.instructions.pack(pady=(0, 20))
+        self.status_label.pack(pady=(0, 10))
+        self.events_label.pack(pady=(10, 10))
+        self.decision_menu.pack(pady=(0, 10))
+        self.next_button.pack(pady=(0, 10))
+        self.new_life_button.pack_forget()
+
+    def submit_decision(self):
+        if hasattr(self.character, 'died') and self.character.died:
+            return
+
+        if self.character.age < 115:
+            choice = self.decision_var.get()
+            self.character.make_decision(choice)
+            self.character.age_one_year()
+            self.status_text.set(self.character.display_status())
+            self.events_text.set(self.character.display_events())
+        else:
+            messagebox.showinfo("Game Over", "Thank you for playing LifeQuest!")
+            self.root.quit()
+
+    def start_new_life(self):
+        self.character = None
+        self.state = 'Title'
+        self.game_frame.pack_forget()
+        self.title_frame.pack(padx=20, pady=20)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = GameApp(root)
+    root.mainloop()
